@@ -8,16 +8,7 @@ from langchain_community.document_loaders.csv_loader import CSVLoader
 
 
 def load_documents(data_path: str = "finsolve_docs") -> List[Document]:
-    """
-    Load markdown and CSV documents from the specified directory
-    and add metadata such as role and topic based on filename.
-
-    Args:
-        data_path (str): Folder containing markdown and CSV files.
-
-    Returns:
-        List[Document]: Combined list of Documents with metadata.
-    """
+   
 
     #  Load Markdown  files with UnstructuredMarkdownLoader
     md_loader = DirectoryLoader(
