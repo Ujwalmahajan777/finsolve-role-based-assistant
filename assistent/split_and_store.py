@@ -10,7 +10,7 @@ load_dotenv()
 
 # 1. Load documents using loader.py
 docs = load_documents("finsolve_docs")
-# print(f"✅ Loaded {len(docs)} documents.")
+
 
 # 2. Split documents into smaller chunks
 splitter = RecursiveCharacterTextSplitter(
@@ -20,7 +20,6 @@ splitter = RecursiveCharacterTextSplitter(
 )
 
 chunked_docs = splitter.split_documents(docs)
-# print(f"✅ Split into {len(chunked_docs)} chunks.")
 
 # 3. Create embeddings using HuggingFace model
 embedding_model = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
@@ -39,16 +38,5 @@ vectorstore = Chroma.from_documents(
     persist_directory=CHROMA_DIR
 )
 
-# vectorstore.persist()
-# print("✅ Vector store saved to:", CHROMA_DIR)
+vectorstore.persist()
 
-
-# view=vectorstore.get(include=['embeddings','metadatas','documents'])
-# print(view)
-
-# search document
-# search = vectorstore.similarity_search(
-#     query='give me the executive summary of finsolve technologies in 2024',
-#     k=1
-# )
-# print(search)
