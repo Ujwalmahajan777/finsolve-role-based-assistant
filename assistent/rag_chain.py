@@ -15,39 +15,39 @@ from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
 from dotenv import load_dotenv
 import os
 
-# Load environment variables from .env
+
 load_dotenv()
 
-# ✅ Format retrieved documents into string context
+# combine retrieved documents into string context
 def format_docs(docs):
     return "\n\n".join(doc.page_content for doc in docs)
 
 
-# ✅ Return RAG chain for a specific role
+
 def get_rag_chain(role: str):
     # Load existing vector DB
     embedding = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
     vector_store = Chroma(persist_directory="./vector_store", embedding_function=embedding)
 
-    # LLM model
+    # LLM 
     model = ChatDeepSeek(model_name="deepseek-chat")
 
 
-    # Role-based filtering logic
+    # Role-based filtering 
     role = role.strip().lower()
     if role == "c-level":
         base_retriever = vector_store.as_retriever(search_kwargs={"k": 15})  # Full access
     else:
         base_retriever = vector_store.as_retriever(search_kwargs={"k": 15, "filter": {"role": role}})
 
-    # Optional: compress documents to reduce tokens
+    # Optional: compress documents for better context
     base_compressor = LLMChainExtractor.from_llm(model)
     retriever = ContextualCompressionRetriever(
         base_retriever=base_retriever,
         base_compressor=base_compressor
     )
 
-    # Prompt with strict access rules
+    # Prompt 
     prompt = PromptTemplate(
         template=(
            " You are a domain expert AI working at a FinTech company."
@@ -87,29 +87,4 @@ def get_rag_chain(role: str):
     return main_chain
 
 
-# ✅ Optional: Manual CLI Chat Mode (does not run during FastAPI import)
-if __name__ == "__main__":
-    print("🔧 CLI Chat Mode: FinSolve Assistant")
-    role = input("Enter your role (e.g. HR, finance, marketing): ").strip().lower()
 
-    chain = get_rag_chain(role)
-
-    chat_history = [SystemMessage(content="You are a helpful AI assistant for FinSolve Technologies.")]
-
-    while True:
-        user_input = input("\nYou: ")
-        if user_input.lower() in {"exit", "quit"}:
-            print("👋 Exiting FinSolve Assistant...")
-            break
-
-        chat_history.append(HumanMessage(content=user_input))
-
-        try:
-            response = chain.invoke({
-                "role": role,
-                "question": user_input
-            })
-            chat_history.append(AIMessage(content=response))
-            print(f"\n🤖 AI: {response}")
-        except Exception as e:
-            print(f"⚠️ Error: {str(e)}")
